@@ -452,22 +452,14 @@ jobs:
           SIGNING_IDENTITY: "Apple Development: Samuel Wein (B26WBF742H)"
           SIGNING_EMAIL: "apple@openms.de"
           CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
-    
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts
-        path: OpenMS/bld/**
-
-    
+  
 
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
     - name: Upload packages as artifacts
       if: steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ format('installer-{0}{1}', steps.set-vars.outputs.tp_folder, runner.arch == 'arm64' && '-arm64' || '') }}
+        name: installer-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.compiler_ver }}${{ runner.arch == 'arm64' && '-arm64' || '' }}
         path: |
           ${{ github.workspace }}/OpenMS/bld/*.exe
           ${{ github.workspace }}/OpenMS/bld/*.deb

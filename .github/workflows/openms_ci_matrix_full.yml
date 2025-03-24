@@ -416,7 +416,7 @@ jobs:
 
     # Load the code signing certificate and the package signing certificate TODO: Change which cert to use for non-nightly
     - name: Import Apple Developer Certificates
-      if: false
+      if: steps.set-vars.outputs.pkg_type != 'none'
       env:
         APPLE_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERT_64 }}
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPMENT_PW }}
@@ -452,6 +452,15 @@ jobs:
           SIGNING_IDENTITY: "Apple Development: Samuel Wein (B26WBF742H)"
           SIGNING_EMAIL: "apple@openms.de"
           CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
+    
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: OpenMS/bld/**
+
+    
 
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
     - name: Upload packages as artifacts

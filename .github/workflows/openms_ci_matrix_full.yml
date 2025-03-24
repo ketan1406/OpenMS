@@ -455,14 +455,31 @@ jobs:
   
 
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
-    - name: Upload packages as artifacts
+    # For Windows:
+    - name: Upload Windows packages as artifacts
+      if: startsWith(matrix.os, 'windows') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.compiler_ver }}${{ runner.arch == 'arm64' && '-arm64' || '' }}
+        name: installer-Windows
         path: |
-          ${{ github.workspace }}/OpenMS/bld/*.exe
-          ${{ github.workspace }}/OpenMS/bld/*.deb
-          ${{ github.workspace }}/OpenMS/bld/*.pkg
+          ${{ github.workspace }}/OpenMS/OpenMS/bld/*.exe
+          ${{ github.workspace }}/OpenMS/OpenMS/bld/*.deb
+
+    # For Linux:
+    - name: Upload Linux packages as artifacts
+      if: startsWith(matrix.os, 'ubuntu') && steps.set-vars.outputs.pkg_type != 'none'
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-Linux
+        path: ${{ github.workspace }}/OpenMS/OpenMS/bld/*.deb
+
+    # For macOS:
+    - name: Upload macOS packages as artifacts
+      if: startsWith(matrix.os, 'macos') && steps.set-vars.outputs.pkg_type != 'none'
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-MacOS
+        path: ${{ github.workspace }}/OpenMS/OpenMS/bld/*.pkg
 
     #Zip the documentation first, since there are :: which make the upload action choke.
     - name: Zip Documentation

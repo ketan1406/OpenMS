@@ -456,7 +456,6 @@ jobs:
 
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
     - name: Upload packages as artifacts
-      if: steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
         name: installer-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.compiler_ver }}${{ runner.arch == 'arm64' && '-arm64' || '' }}

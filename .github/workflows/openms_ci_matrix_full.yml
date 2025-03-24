@@ -449,9 +449,9 @@ jobs:
           SEARCH_ENGINES_DIRECTORY: "${{ github.workspace }}/_thirdparty"
           CI_PROVIDER: "GitHub-Actions"
           BUILD_NAME: "${{ steps.extract_branch.outputs.RUN_NAME }}-${{ steps.set-vars.outputs.tp_folder }}-${{ runner.arch }}-${{ matrix.compiler }}-${{ matrix.compiler_ver }}-class-topp-${{ github.run_number }}"
-          SIGNING_IDENTITY: "Apple Development: Samuel Wein (B26WBF742H)"
-          SIGNING_EMAIL: "apple@openms.de"
-          CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
+          SIGNING_IDENTITY: "-"
+          SIGNING_EMAIL: "-"
+          CPACK_PRODUCTBUILD_IDENTITY_NAME: "-"
   
     - name: Debug List build folder
       run: ls -R "${{ github.workspace }}/OpenMS/bld/"
@@ -479,7 +479,7 @@ jobs:
       if: startsWith(matrix.os, 'macos') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-MacOS-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
+        name: installer-MacOS
         path: ${{ github.workspace }}/OpenMS/bld/*.pkg
     #Zip the documentation first, since there are :: which make the upload action choke.
     - name: Zip Documentation

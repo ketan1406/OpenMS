@@ -134,12 +134,15 @@ install(CODE "execute_process(COMMAND ${OPENMS_HOST_DIRECTORY}/cmake/MacOSX/fix_
 # If the install CODE is not in the same component though, we need to navigate from the component specific install
 # prefix to the other prefix. This is unfortunately very unrobust.
 # TODO find better order or rewrite fix_dependencies script to be called separately
-install(CODE "
-        execute_process(COMMAND find \${CMAKE_INSTALL_PREFIX}/../../../Applications${CPACK_PACKAGING_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/ -type f -execdir codesign --force --options runtime -i de.openms.TOPP.{} --sign \"${CPACK_BUNDLE_APPLE_CERT_APP}\" {} \\; OUTPUT_VARIABLE topp_sign_out ERROR_VARIABLE topp_sign_out)
-        execute_process(COMMAND find \${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/ -type f -execdir codesign --force --options runtime -i de.openms.TOPP.libs.{} --sign \"${CPACK_BUNDLE_APPLE_CERT_APP}\" {} \\; OUTPUT_VARIABLE topp_sign_out ERROR_VARIABLE topp_sign_out)
-        message('\${topp_sign_out}')"
-        COMPONENT Dependencies
-        )
+if(DEFINED CPACK_BUNDLE_APPLE_CERT_APP AND NOT CPACK_BUNDLE_APPLE_CERT_APP STREQUAL "")
+  install(CODE "
+    execute_process(COMMAND find \${CMAKE_INSTALL_PREFIX}/../../../Applications${CPACK_PACKAGING_INSTALL_PREFIX}/${INSTALL_BIN_DIR}/ -type f -execdir codesign --force --options runtime -i de.openms.TOPP.{} --sign \"${CPACK_BUNDLE_APPLE_CERT_APP}\" {} \\; OUTPUT_VARIABLE topp_sign_out ERROR_VARIABLE topp_sign_out)
+    execute_process(COMMAND find \${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/ -type f -execdir codesign --force --options runtime -i de.openms.TOPP.libs.{} --sign \"${CPACK_BUNDLE_APPLE_CERT_APP}\" {} \\; OUTPUT_VARIABLE topp_sign_out ERROR_VARIABLE topp_sign_out)
+    message('\${topp_sign_out}')
+  " COMPONENT Dependencies)
+else()
+  message(STATUS "Skipping code signing because no Apple certificate is provided.")
+endif()
 install(CODE "execute_process(COMMAND ${OPENMS_HOST_DIRECTORY}/cmake/MacOSX/fix_dependencies.rb -l \${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}/ -e @rpath/ -n -c)"
         COMPONENT library
         )

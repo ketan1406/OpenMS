@@ -30,6 +30,7 @@ on:
         default: false
   push:
     branches:
+      - dev
       - nightly
       - release/*
   pull_request:

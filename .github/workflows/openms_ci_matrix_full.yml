@@ -418,12 +418,12 @@ jobs:
     - name: Import Apple Developer Certificates
       if: false
       env:
-         APPLE_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERT_64 }}
-         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPMENT_PW }}
-         INSTALLER_CERTIFICATE: ${{ secrets.APPLE_INSTALLER_CERT_64 }}
-         INSTALLER_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_INSTALLER_PW }}
-         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-       run: echo "Skipping code signing"
+        APPLE_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERT_64 }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPMENT_PW }}
+        INSTALLER_CERTIFICATE: ${{ secrets.APPLE_INSTALLER_CERT_64 }}
+        INSTALLER_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_INSTALLER_PW }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: echo "Skipping code signing"
        
     - name: Package
       if: steps.set-vars.outputs.pkg_type != 'none'

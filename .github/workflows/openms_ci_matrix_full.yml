@@ -453,34 +453,33 @@ jobs:
           SIGNING_EMAIL: "apple@openms.de"
           CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
   
-
+    - name: Debug: List build folder
+      run: ls -R $GITHUB_WORKSPACE/OpenMS/bld/
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
     # For Windows:
     - name: Upload Windows packages as artifacts
       if: startsWith(matrix.os, 'windows') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-Windows
+        name: installer-Windows-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
         path: |
-          ${{ github.workspace }}/OpenMS/OpenMS/bld/*.exe
-          ${{ github.workspace }}/OpenMS/OpenMS/bld/*.deb
-
+          ${{ github.workspace }}/OpenMS/bld/*.exe
+          ${{ github.workspace }}/OpenMS/bld/*.deb
     # For Linux:
     - name: Upload Linux packages as artifacts
       if: startsWith(matrix.os, 'ubuntu') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-Linux
-        path: ${{ github.workspace }}/OpenMS/OpenMS/bld/*.deb
+        name: installer-Linux-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
+        path: ${{ github.workspace }}/OpenMS/bld/*.deb
 
     # For macOS:
     - name: Upload macOS packages as artifacts
       if: startsWith(matrix.os, 'macos') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-MacOS
-        path: ${{ github.workspace }}/OpenMS/OpenMS/bld/*.pkg
-
+        name: installer-MacOS-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
+        path: ${{ github.workspace }}/OpenMS/bld/*.pkg
     #Zip the documentation first, since there are :: which make the upload action choke.
     - name: Zip Documentation
       if: steps.set-vars.outputs.pkg_type != 'none' && startsWith(matrix.os, 'ubuntu')

@@ -471,7 +471,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-Linux-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
+        name: installer-Linux-${{ matrix.compiler }}-${{ matrix.compiler_ver }}-${{ runner.arch }}
         path: ${{ github.workspace }}/OpenMS/bld/*.deb
 
     # For macOS:
@@ -479,7 +479,7 @@ jobs:
       if: startsWith(matrix.os, 'macos') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: installer-MacOS
+        name: installer-MacOS-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
         path: ${{ github.workspace }}/OpenMS/bld/*.pkg
     #Zip the documentation first, since there are :: which make the upload action choke.
     - name: Zip Documentation

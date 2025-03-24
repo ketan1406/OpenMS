@@ -454,7 +454,7 @@ jobs:
           CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
   
     - name: Debug: List build folder
-      run: ls -R $GITHUB_WORKSPACE/OpenMS/bld/
+      run: ls -R "${{ github.workspace }}/OpenMS/bld/"
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
     # For Windows:
     - name: Upload Windows packages as artifacts

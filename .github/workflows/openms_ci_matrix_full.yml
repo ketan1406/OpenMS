@@ -30,6 +30,7 @@ on:
         default: false
   push:
     branches:
+      - dev2
       - nightly
       - release/*
   pull_request:
@@ -99,7 +100,7 @@ jobs:
     - id: set-vars
       name: Set extra variables
       run: |
-        DO_PACKAGE=$( [[ ( "${{ inputs.package }}" || "${{ steps.extract_branch.outputs.RUN_NAME }}" == "nightly" || "${{ steps.extract_branch.outputs.RUN_NAME }}" =~ release/* ) && "${{ matrix.compiler }}" != "clang++" ]] && echo true || echo false)
+        DO_PACKAGE=true
         echo $DO_PACKAGE
         if [[ "${{ matrix.os }}" == ubuntu-* ]]; then
           echo "tp_folder=Linux" >> $GITHUB_OUTPUT
@@ -415,25 +416,15 @@ jobs:
 
     # Load the code signing certificate and the package signing certificate TODO: Change which cert to use for non-nightly
     - name: Import Apple Developer Certificates
-      if: steps.set-vars.outputs.pkg_type != 'none' && startsWith(matrix.os, 'macos')
+      if: false
       env:
         APPLE_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERT_64 }}
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPMENT_PW }}
         INSTALLER_CERTIFICATE: ${{ secrets.APPLE_INSTALLER_CERT_64 }}
         INSTALLER_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_INSTALLER_PW }}
         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-        echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
-        echo $INSTALLER_CERTIFICATE | base64 --decode > installer_certificate.p12
-        security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-        security set-keychain-settings -t 3600 -u build.keychain
-        security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-        security import installer_certificate.p12 -k build.keychain -P "$INSTALLER_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-        security find-identity -v -p codesigning build.keychain
-
+      run: echo "Skipping code signing"
+       
     - name: Package
       if: steps.set-vars.outputs.pkg_type != 'none'
       shell: bash
@@ -458,21 +449,36 @@ jobs:
           SEARCH_ENGINES_DIRECTORY: "${{ github.workspace }}/_thirdparty"
           CI_PROVIDER: "GitHub-Actions"
           BUILD_NAME: "${{ steps.extract_branch.outputs.RUN_NAME }}-${{ steps.set-vars.outputs.tp_folder }}-${{ runner.arch }}-${{ matrix.compiler }}-${{ matrix.compiler_ver }}-class-topp-${{ github.run_number }}"
-          SIGNING_IDENTITY: "Apple Development: Samuel Wein (B26WBF742H)"
-          SIGNING_EMAIL: "apple@openms.de"
-          CPACK_PRODUCTBUILD_IDENTITY_NAME: "Developer ID Installer: OpenMS Inc. (C64UCGJ5PL)"
+          SIGNING_IDENTITY: "-"
+          SIGNING_EMAIL: "-"
+          CPACK_PRODUCTBUILD_IDENTITY_NAME: "-"
+  
 
     # WARNING: Here you have to make sure that only one matrix configuration per OS produces packages. See set-vars steps.
-    - name: Upload packages as artifacts
-      if: steps.set-vars.outputs.pkg_type != 'none'
+    # For Windows:
+    - name: Upload Windows packages as artifacts
+      if: startsWith(matrix.os, 'windows') && steps.set-vars.outputs.pkg_type != 'none'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ format('installer-{0}{1}', steps.set-vars.outputs.tp_folder, runner.arch == 'arm64' && '-arm64' || '') }}
+        name: installer-Windows-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
         path: |
           ${{ github.workspace }}/OpenMS/bld/*.exe
           ${{ github.workspace }}/OpenMS/bld/*.deb
-          ${{ github.workspace }}/OpenMS/bld/*.pkg
+    # For Linux:
+    - name: Upload Linux packages as artifacts
+      if: startsWith(matrix.os, 'ubuntu') && steps.set-vars.outputs.pkg_type != 'none'
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-Linux-${{ matrix.compiler }}-${{ matrix.compiler_ver }}-${{ runner.arch }}
+        path: ${{ github.workspace }}/OpenMS/bld/*.deb
 
+    # For macOS:
+    - name: Upload macOS packages as artifacts
+      if: startsWith(matrix.os, 'macos') && steps.set-vars.outputs.pkg_type != 'none'
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-MacOS-${{ matrix.compiler }}-${{ matrix.compiler_ver }}
+        path: ${{ github.workspace }}/OpenMS/bld/*.pkg
     #Zip the documentation first, since there are :: which make the upload action choke.
     - name: Zip Documentation
       if: steps.set-vars.outputs.pkg_type != 'none' && startsWith(matrix.os, 'ubuntu')
